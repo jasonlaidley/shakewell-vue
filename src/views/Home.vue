@@ -16,10 +16,58 @@ export default {
     HelloWorld,
   },
   mounted() {
-    console.log('hello');
-    axios.get('http://localhost/shakes').then((response) => {
-      console.log(response);
-    });
+    // Get exercise list
+    async function getExercises() {
+      // check Schedule
+      const checkSchedule = (seconds) => {
+        console.log(seconds);
+      };
+
+      // Timer
+      const timer = () => {
+        let seconds = 0;
+        // Each second
+        const timerId = setInterval(() => {
+          checkSchedule(seconds);
+          // End
+          if (seconds === 5) { clearInterval(timerId); }
+          seconds += 1;
+        }, 1000);
+      };
+
+      // Make schedule
+      const makeSchedule = (exercises) => {
+        let startSeconds = 0;
+        let accumulatedSeconds = 0;
+        // Add start time to each exercise
+        const schedule = exercises.map((exercise) => {
+          startSeconds = accumulatedSeconds;
+          accumulatedSeconds += exercise.exercise_duration;
+          return {
+            ...exercise,
+            startTime: startSeconds,
+          };
+        });
+        console.log(schedule);
+      };
+
+      try {
+        // Call api
+        const { data: exercises } = await axios.get('http://localhost/exercises');
+        console.log(exercises);
+
+        // Make schedule
+        makeSchedule(exercises);
+
+        // Start timer
+        timer();
+
+      // Error
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getExercises();
   },
 };
 </script>

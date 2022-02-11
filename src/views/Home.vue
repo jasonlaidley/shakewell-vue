@@ -37,9 +37,9 @@ export default {
 
       // Make schedule
       const makeSchedule = (exercises) => {
+        // Add start time to each exercise
         let startSeconds = 0;
         let accumulatedSeconds = 0;
-        // Add start time to each exercise
         const schedule = exercises.map((exercise) => {
           startSeconds = accumulatedSeconds;
           accumulatedSeconds += exercise.exercise_duration;

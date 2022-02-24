@@ -1,7 +1,6 @@
 <template>
   <div class='home'>
-    <ShakeVideo />
-    <iframe src="https://player.vimeo.com/video/678926274?h={hash_parameter}" width="{video_width}" height="{video_height}" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+    <!--<ShakeVideo />-->
     <div id="vim1"></div>
   </div>
 </template>
@@ -10,7 +9,7 @@
 <script>
 // @ is an alias to /src
 import ShakeVideo from '@/components/ShakeVideo.vue';
-import axios from 'axios';
+import Player from '@vimeo/player';
 
 export default {
   data() {
@@ -23,19 +22,40 @@ export default {
     ShakeVideo,
   },
   mounted() {
-    axios.get('http://localhost/shakes').then((response) => {
-      console.log(response);
-    });
-    document.getElementById('videoFront1').play();
     //Vimeo
     const options01 = {
-      id: 678926274,
-      width: 500
+      id: 678926305,
+      width: 500,
+      height: 500,
+      controls: false,
+      keyboard: false,
+      muted: true,
+      title: false,
+      autopause: false
     };
-    const video01Player = new Vimeo.Player('vim1', options01);
-    video01Player.on('play', function() {
-      console.log('Played the first video');
+    const player1 = new Player('vim1', options01);
+    //Play
+    player1.play()
+    .then(function() {
+      console.log("The video is playing");
+    }).catch(function(error) {
+      console.log(error);
     });
+    //Seek
+    /*player1.setCurrentTime(10)
+    .then(function(seconds) {
+      console.log(`actual seek ${seconds}`)
+    }).catch(function(error) {
+        console.log(error);
+    });*/
+    //Progress - how nmuch is loaded?
+    /*player1.on('progress', function(data) {
+      console.log(`progress: ${JSON.stringify(data)}`);
+    });*/
+    //Timeupdate - current time
+    /*player1.on('timeupdate', function(data) {
+      console.log(`timeupdate: ${JSON.stringify(data)}`);
+    });*/
   },
 };
 </script>

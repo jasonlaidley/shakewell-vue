@@ -16,58 +16,60 @@ export default {
     HelloWorld,
   },
   mounted() {
+    // check Schedule
+    const checkSchedule = (seconds, schedule) => {
+      //Time
+      console.log(schedule[seconds]['time']['start_seconds']);
+      //Exercise remaining time countdown
+      if (schedule[seconds]['countdown']) {
+        console.log(`countdown: ${schedule[seconds]["countdown"]["display"]}`);
+      }
+      //Main exercise video
+      if (schedule[seconds]['main']) {
+        console.log(`main: ${schedule[seconds]["main"]["video_front"]}`);
+      }
+      //Preview exercise video
+      if (schedule[seconds]['preview']) {
+        console.log(`preview: ${schedule[seconds]["preview"]["video_front"]}`);
+      }
+    };
+
+    // Timer
+    const timer = (schedule) => {
+
+      console.log(schedule);
+      let seconds = 0;
+
+      // Each second
+      const timerId = setInterval(() => {
+        // Run schedule check
+        checkSchedule(seconds, schedule);
+        // End
+        if (seconds === 30) { clearInterval(timerId); }
+        // Accumulate seconds
+        seconds += 1;
+      }, 1000);
+    };
+
     // Get exercise list
-    async function getExercises() {
-      // check Schedule
-      const checkSchedule = (seconds) => {
-        console.log(seconds);
-      };
-
-      // Timer
-      const timer = () => {
-        let seconds = 0;
-        // Each second
-        const timerId = setInterval(() => {
-          checkSchedule(seconds);
-          // End
-          if (seconds === 5) { clearInterval(timerId); }
-          seconds += 1;
-        }, 1000);
-      };
-
-      // Make schedule
-      const makeSchedule = (exercises) => {
-        // Add start time to each exercise
-        let startSeconds = 0;
-        let accumulatedSeconds = 0;
-        const schedule = exercises.map((exercise) => {
-          startSeconds = accumulatedSeconds;
-          accumulatedSeconds += exercise.exercise_duration;
-          return {
-            ...exercise,
-            startTime: startSeconds,
-          };
-        });
-        console.log(schedule);
-      };
-
+    const getSchedule = async () => {  
       try {
         // Call api
-        const { data: exercises } = await axios.get('http://localhost/exercises');
-        console.log(exercises);
-
-        // Make schedule
-        makeSchedule(exercises);
-
-        // Start timer
-        timer();
+        const { data: schedule } = await axios.get('http://localhost/schedule');
+        return schedule;
 
       // Error
       } catch (error) {
         console.error(error);
       }
     }
-    getExercises();
+
+    getSchedule()
+    .then(
+      (schedule) => {
+        timer(schedule)
+      }
+    );
   },
 };
 </script>

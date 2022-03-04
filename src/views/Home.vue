@@ -1,13 +1,11 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <Exercises
-      v-for="(item, index) in schedule"
-      :item="item"
-      :key="index"
-      :exerciseDeets="item.main"
-    ></Exercises>
     <Countdown :timerCount="timerCount"/>
+    <Exercises
+      v-for="(item, index) in mainVideos"
+      :key="index"
+      :exerciseDeets="item"
+    ></Exercises>
   </div>
 </template>
 
@@ -26,81 +24,100 @@ export default {
   data() {
     return {
       schedule: {},
+      mainVideos: {},
       timerCount: 0,
     };
   },
   methods: {
-    increment(seconds) {
-      this.timerCount = seconds;
-    }
-  },
-  mounted() {
-    // check Schedule
-    const checkSchedule = (seconds, schedule) => {
-      //Time
-      console.log(schedule[seconds]['time']['start_seconds']);
-      //Exercise remaining time countdown
-      if (schedule[seconds]['countdown']) {
-        //console.log(`countdown: ${schedule[seconds]["countdown"]["display"]}`);
-        let countdown = schedule[seconds]["countdown"]["display"];
-        this.timerCount = countdown;
-        //this.increment(seconds)
-      }
-      //Main exercise video
-      if (schedule[seconds]['main']) {
-        //console.log(`main: ${schedule[seconds]["main"]["video_front"]}`);
-      }
-      //Preview exercise video
-      if (schedule[seconds]['preview']) {
-        //console.log(`preview: ${schedule[seconds]["preview"]["video_front"]}`);
-      }
-    };
-
-    //Make Video list
-    const makeVideoList = (schedule) => {
-      const result = schedule.filter(element => {
-        return element['main'];
-      });
-      this.schedule = result;
-    }
-
-    // Timer
-    const timer = (schedule) => {
-      console.log(schedule);
-      let seconds = 0;
-
-      // Each second
-      const timerId = setInterval(() => {
-        // Run schedule check
-        checkSchedule(seconds, schedule);
-        // End
-        if (seconds === 30) { clearInterval(timerId); }
-        // Accumulate seconds
-        seconds += 1;
-      }, 1000);
-    };
-
-    // Get schedule list
-    const getSchedule = async () => {  
+    //Get schedule from server
+    async getSchedule() {  
       try {
         // Call api
         const { data: schedule } = await axios.get('http://localhost/schedule');
-        //this.schedule = schedule;
+        console.log(schedule);
+        this.schedule = schedule;
         return schedule;
-
       // Error
       } catch (error) {
         console.error(error);
       }
-    }
+    },
 
-    getSchedule()
+    // Creeate video list
+    updateVideoList() {
+      //Go through each second on schedule
+      let mainVideosArray = {};
+      this.schedule.forEach(function(scheduled, index) {
+        let videoKey = `main${index}`;
+        //If scheduled item contains a 'main' event
+        if (videoKey in scheduled) {
+          //Create video object
+          let mainVideoObj = {[videoKey]: scheduled[videoKey]};
+          //Assign to object
+          mainVideosArray = Object.assign(mainVideosArray, mainVideoObj);
+        }
+      });
+      //Update stored data
+      this.mainVideos = mainVideosArray;
+    },
+
+    //Go through each item on schedule once per second
+    timer(schedule) {
+      //Perfom every second until end of schedule
+      let second = 0;
+      const timerId = setInterval(() => {
+        //Run schedule check
+        this.checkSchedule(second);
+        //End
+        if (second === 30) { clearInterval(timerId); }
+        //Accumulate second
+        second += 1;
+      }, 1000);
+    },
+
+    //Check what events there are every second
+    checkSchedule(second) {
+      //Time
+      console.log(second);
+
+      //Exercise remaining time countdown
+      let countdownKey = `countdown${second}`;
+      if (this.schedule[second][countdownKey]) {
+        //Update timerCoont data
+        let countdown = this.schedule[second][countdownKey]['display'];
+        this.timerCount = countdown;
+      }
+
+      //Main exercise video
+      let mainVideoKey = `main${second}`;
+      if (this.schedule[second][mainVideoKey]) {
+        this.schedule[second][mainVideoKey]['playing'] = true;
+      }
+
+      //Preview exercise video
+      if (this.schedule[second]['preview']) {
+        //console.log(`preview: ${schedule[second]["preview"]["video_front"]}`);
+      }
+    },
+
+    //Play video
+    startPlaying(second) {
+      const videoToPlay = this.schedule.filter(element => {
+        return element['main']['id'] == second;
+      });
+      console.log(videoToPlay);
+      //this.schedule = second;
+    }
+  },
+  mounted() {
+    //Get schedule from server
+    this.getSchedule()
     .then(
       (schedule) => {
-        makeVideoList(schedule);
-        timer(schedule);
+        this.updateVideoList();
+        this.timer(schedule);
       }
     );
-  },
+  }
 };
 </script>

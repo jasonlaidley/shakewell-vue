@@ -12,25 +12,54 @@ import Player from '@vimeo/player';
 export default {
   name: 'Exercises',
   props: {
-    exerciseDeets: [Array, Object],
+    exerciseDeets: Object
+  },
+  data() {
+    return {
+      videoPlayer: {},
+    };
+  },
+  watch: {
+    // whenever 'playing' changes, this function will run
+    'exerciseDeets.playing'(playing) {
+      //If playing turns to true 
+      if (playing === true) {
+        this.playVideo();
+      } else {
+        //
+      }
+    }
+  },
+  methods: {
+    loadVideo() {
+      //Get Vimeo video id from schedule
+      const videoId = this.exerciseDeets.video_side;
+      
+      if (videoId > 0) {
+        //Vimeo options
+        const videoOptions = {
+          id: videoId,
+          width: 500,
+          height: 500,
+          controls: false,
+          keyboard: false,
+          muted: true,
+          title: false,
+          autopause: false
+        };
+        
+        //Vimeo player
+        const videoPlayer = new Player(videoId, videoOptions);
+        this.videoPlayer = videoPlayer;
+      }
+    },
+    playVideo() {
+      //Play
+      this.videoPlayer.play();
+    }
   },
   mounted() {
-    //console.log( this.exerciseDeets.video_side );
-    let vidId = this.exerciseDeets.video_side;
-    if (this.exerciseDeets.video_side > 0) {
-      //Vimeo
-      let options01 = {
-        id: vidId,
-        width: 500,
-        height: 500,
-        controls: false,
-        keyboard: false,
-        muted: true,
-        title: false,
-        autopause: false
-      };
-      let player1 = new Player(vidId, options01);
-    }
+    this.loadVideo();
     
     //Play
     /*player1.play()
@@ -39,6 +68,7 @@ export default {
     }).catch(function(error) {
       console.log(error);
     });*/
+
     //Seek
     /*player1.setCurrentTime(10)
     .then(function(seconds) {
@@ -46,10 +76,12 @@ export default {
     }).catch(function(error) {
         console.log(error);
     });*/
+
     //Progress - how nmuch is loaded?
     /*player1.on('progress', function(data) {
       console.log(`progress: ${JSON.stringify(data)}`);
     });*/
+
     //Timeupdate - current time
     /*player1.on('timeupdate', function(data) {
       console.log(`timeupdate: ${JSON.stringify(data)}`);

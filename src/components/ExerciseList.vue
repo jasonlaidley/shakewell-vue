@@ -1,5 +1,9 @@
 <template>
-  <div v-if="exerciseDeets.video_side" :id="divId" :class="['videoDiv', exerciseDeets.playing ? 'showVideo' : 'hideVideo']"></div>
+  <div>
+    <p>{{ exerciseDeets.name }}</p>
+    <div v-if="exerciseDeets.video_side" :id="divId" :class="['videoDiv', exerciseDeets.playing ? 'showVideo' : 'hideVideo']"></div>
+    <hr>
+  </div>
 </template>
 
 <script>
@@ -38,8 +42,8 @@ export default {
         //Vimeo options
         const videoOptions = {
           id: videoId,
-          width: this.videoSize,
-          height: this.videoSize,
+          width: '100%', //this.videoSize,
+          height: '100%', //this.videoSize,
           controls: false,
           keyboard: false,
           muted: true,
@@ -96,26 +100,28 @@ export default {
 </script>
 
 <style lang="scss">
-#videoDiv {
+#listDiv {
 
   .videoDiv {
-    position: absolute;
-    top: 0;
-    left: 0;
+    overflow: hidden;
   }
 
   .hideVideo {
-    opacity: 0;
+    height: 0px;
   }
 
   .showVideo {
-    animation-name: fade-in;
-    animation-duration: 5s;
+    animation-name: stretch-in;
+    animation-duration: 1s;
   }
 
-  @keyframes fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+  @keyframes stretch-in {
+    0% { 
+      height: 0px;
+    }
+    100% {
+      height: 100px;
+    }
   }
 }
 </style>

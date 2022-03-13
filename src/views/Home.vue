@@ -1,29 +1,44 @@
 <template>
-  <div class="home">
+  <div>
     <Countdown :timerCount="timerCount"/>
-    <Exercises
-      v-for="(item, index) in mainVideos"
-      :key="index"
-      :exerciseDeets="item"
-    ></Exercises>
+    <div id="listDiv">
+      <ExerciseList
+        v-for="(video, index) in previewVideos"
+        :key="index"
+        :divId="index"
+        :exerciseDeets="video"
+      ></ExerciseList>
+    </div>
+    <div id="videoDiv">
+      <Exercises
+        v-for="(video, index) in mainVideos"
+        :key="index"
+        :divId="index"
+        :exerciseDeets="video"
+        :videoSize="500"
+      ></Exercises>
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import ExerciseList from '@/components/ExerciseList.vue';
 import Exercises from '@/components/Exercises.vue';
 import Countdown from '@/components/Countdown.vue';
 
 export default {
   name: 'Home',
   components: {
+    ExerciseList,
     Exercises,
     Countdown,
   },
   data() {
     return {
       schedule: {},
+      previewVideos: {},
       mainVideos: {},
       timerCount: 0,
     };
@@ -43,21 +58,36 @@ export default {
       }
     },
 
-    // Creeate video list
-    updateVideoList() {
-      //Go through each second on schedule
+    // Create video list
+    createVideoList() {
+      //Create temp video objects
+      let previewVideosArray = {};
       let mainVideosArray = {};
+
+      //Go through each second on schedule
       this.schedule.forEach(function(scheduled, index) {
-        let videoKey = `main${index}`;
-        //If scheduled item contains a 'main' event
-        if (videoKey in scheduled) {
+        
+        //If scheduled item contains a 'preview' event
+        if (`preview${index}` in scheduled) {
           //Create video object
-          let mainVideoObj = {[videoKey]: scheduled[videoKey]};
-          //Assign to object
-          mainVideosArray = Object.assign(mainVideosArray, mainVideoObj);
+          let previewVideoKey = `preview${index}`;
+          let previewVideoObject = {[previewVideoKey]: scheduled[previewVideoKey]};
+          //Assign to temp object
+          previewVideosArray = Object.assign(previewVideosArray, previewVideoObject);
+        }
+
+        //If scheduled item contains a 'main' event
+        if (`main${index}` in scheduled) {
+          //Create video object
+          let mainVideoKey = `main${index}`;
+          let mainVideoObject = {[mainVideoKey]: scheduled[mainVideoKey]};
+          //Assign to temp object
+          mainVideosArray = Object.assign(mainVideosArray, mainVideoObject);
         }
       });
+
       //Update stored data
+      this.previewVideos = previewVideosArray;
       this.mainVideos = mainVideosArray;
     },
 
@@ -95,29 +125,36 @@ export default {
       }
 
       //Preview exercise video
-      if (this.schedule[second]['preview']) {
-        //console.log(`preview: ${schedule[second]["preview"]["video_front"]}`);
+      let previewVideoKey = `preview${second}`;
+      if (this.schedule[second][previewVideoKey]) {
+        this.schedule[second][previewVideoKey]['playing'] = true;
       }
     },
-
-    //Play video
-    startPlaying(second) {
-      const videoToPlay = this.schedule.filter(element => {
-        return element['main']['id'] == second;
-      });
-      console.log(videoToPlay);
-      //this.schedule = second;
-    }
   },
   mounted() {
     //Get schedule from server
     this.getSchedule()
     .then(
       (schedule) => {
-        this.updateVideoList();
+        this.createVideoList();
         this.timer(schedule);
       }
     );
   }
 };
 </script>
+
+<style lang="scss">
+#listDiv {
+  display: inline-block;
+  vertical-align: top;
+  width: 30%;
+}
+
+#videoDiv {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  width: 70%;
+}
+</style>

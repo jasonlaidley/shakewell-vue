@@ -8,7 +8,6 @@
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // @ is an alias to /src
-import ShakeVideo from '@/components/ShakeVideo.vue';
 import Player from '@vimeo/player';
 
 export default {

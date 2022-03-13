@@ -18,22 +18,25 @@
         :videoSize="500"
       ></Exercises>
     </div>
+    <Conference id="conferenceDiv"/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import Countdown from '@/components/Countdown.vue';
 import ExerciseList from '@/components/ExerciseList.vue';
 import Exercises from '@/components/Exercises.vue';
-import Countdown from '@/components/Countdown.vue';
+import Conference from '@/components/Conference.vue';
 
 export default {
   name: 'Home',
   components: {
+    Countdown,
     ExerciseList,
     Exercises,
-    Countdown,
+    Conference,
   },
   data() {
     return {
@@ -148,13 +151,19 @@ export default {
 #listDiv {
   display: inline-block;
   vertical-align: top;
-  width: 30%;
+  width: 20%;
 }
 
 #videoDiv {
   position: relative;
   display: inline-block;
   vertical-align: top;
-  width: 70%;
+  width: 60%;
+}
+
+#conferenceDiv {
+  display: inline-block;
+  vertical-align: top;
+  width: 20%;
 }
 </style>
